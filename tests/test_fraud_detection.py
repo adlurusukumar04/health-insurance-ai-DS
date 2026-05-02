@@ -15,17 +15,12 @@ Run:
     pytest tests/ -v --cov=src --cov-report=term-missing
 """
 
-import os
-import sys
 import pytest
 import numpy as np
 import pandas as pd
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
-from src.compliance.anonymizer import Anonymizer
-from src.processing.feature_engineering import FeatureEngineer
-from src.monitoring.model_monitor import compute_psi, monitor_feature_drift
+from src.compliance.anonymizer import Anonymizer  # noqa: E402
+from src.processing.feature_engineering import FeatureEngineer  # noqa: E402
+from src.monitoring.model_monitor import compute_psi, monitor_feature_drift  # noqa: E402
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FIXTURES
@@ -164,7 +159,8 @@ class TestAnonymizer:
 
     def test_member_id_hashed(self, anonymizer, sample_members):
         result = anonymizer.anonymize_members(sample_members)
-        for orig, hashed in zip(sample_members["member_id"], result["member_id"]):
+        for orig, hashed in zip(
+                sample_members["member_id"], result["member_id"]):
             assert orig != hashed, "member_id must be hashed"
             assert hashed.startswith("TOK_"), "Hash should start with 'TOK_'"
 
@@ -285,8 +281,11 @@ class TestFeatureEngineer:
         assert result["is_weekend"].isin([0, 1]).all()
 
     def test_handles_missing_provider(
-        self, feature_engineer, sample_members, sample_providers, sample_pharmacy
-    ):
+            self,
+            feature_engineer,
+            sample_members,
+            sample_providers,
+            sample_pharmacy):
         """Claims with unknown provider NPI should not crash."""
         claims_unknown = pd.DataFrame(
             {
@@ -417,7 +416,8 @@ class TestAPI:
         assert "approval_probability" in data
         assert "recommendation" in data
         assert 0.0 <= data["fraud_score"] <= 1.0
-        assert data["fraud_risk_band"] in ("LOW", "MEDIUM", "HIGH", "VERY_HIGH")
+        assert data["fraud_risk_band"] in (
+            "LOW", "MEDIUM", "HIGH", "VERY_HIGH")
 
     def test_score_claim_high_fraud_signals(self, client):
         """Claim with multiple fraud signals should receive high score."""
@@ -535,8 +535,11 @@ class TestAPI:
 class TestEdgeCases:
 
     def test_empty_claims_dataframe(
-        self, feature_engineer, sample_members, sample_providers, sample_pharmacy
-    ):
+            self,
+            feature_engineer,
+            sample_members,
+            sample_providers,
+            sample_pharmacy):
         empty = pd.DataFrame(
             columns=[
                 "claim_id",
@@ -584,8 +587,13 @@ class TestEdgeCases:
 
     def test_anonymizer_empty_dataframe(self, anonymizer):
         empty = pd.DataFrame(
-            columns=["member_id", "first_name", "last_name", "dob", "zip_code", "state"]
-        )
+            columns=[
+                "member_id",
+                "first_name",
+                "last_name",
+                "dob",
+                "zip_code",
+                "state"])
         result = anonymizer.anonymize_members(empty)
         assert len(result) == 0
         assert "first_name" not in result.columns

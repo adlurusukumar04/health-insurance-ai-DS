@@ -15,6 +15,7 @@ Run locally:
     uvicorn src.api.main:app --reload --port 8000
 """
 
+import os
 import logging
 import sys
 import uuid
@@ -97,18 +98,18 @@ async def load_models():
             "feature_cols": _fraud_model_artifact[2],
         }
         log.info("Fraud detection model loaded.")
-    except Exception as e:
-        log.warning(f"Fraud model not found ({e}) — running in demo mode")
+    except Exception as err:
+        log.warning(f"Fraud model not found ({err}) — running in demo mode")
 
     try:
         from src.models.claim_approval_model import ClaimApprovalModel
 
         cam = ClaimApprovalModel()
-        cam.load(f"models/saved/claim_approval_xgboost.joblib")
+        cam.load("models/saved/claim_approval_xgboost.joblib")
         _approval_model = cam
         log.info("Claim approval model loaded.")
-    except Exception as e:
-        log.warning(f"Approval model not found ({e}) — running in demo mode")
+    except Exception as err:
+        log.warning(f"Approval model not found ({err}) — running in demo mode")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -173,7 +174,11 @@ class CaseOutcomeRequest(BaseModel):
 
     @validator("outcome")
     def valid_outcome(cls, v):
-        valid = {"CONFIRMED_FRAUD", "NOT_FRAUD", "INCONCLUSIVE", "REFERRED_TO_LAW"}
+        valid = {
+            "CONFIRMED_FRAUD",
+            "NOT_FRAUD",
+            "INCONCLUSIVE",
+            "REFERRED_TO_LAW"}
         if v not in valid:
             raise ValueError(f"outcome must be one of {valid}")
         return v
@@ -230,8 +235,7 @@ def _demo_score(claim: ClaimScoreRequest) -> dict:
                 "description": f"Provider billing at {claim.peer_billing_percentile:.0f}th percentile vs peers",
                 "value": claim.peer_billing_percentile,
                 "weight": 0.15,
-            }
-        )
+            })
     if claim.n_procedures > 8:
         score += 0.10
         reasons.append(
@@ -240,8 +244,7 @@ def _demo_score(claim: ClaimScoreRequest) -> dict:
                 "description": f"Unusually high procedure count ({claim.n_procedures})",
                 "value": claim.n_procedures,
                 "weight": 0.10,
-            }
-        )
+            })
     if claim.has_high_risk_cpt and not claim.prior_auth:
         score += 0.12
         reasons.append(
@@ -250,8 +253,7 @@ def _demo_score(claim: ClaimScoreRequest) -> dict:
                 "description": "High-risk procedure billed without prior authorization",
                 "value": 1,
                 "weight": 0.12,
-            }
-        )
+            })
 
     score = min(score, 0.99)
     return {"fraud_score": round(score, 4), "reasons": reasons[:5]}
@@ -296,7 +298,9 @@ async def health_check():
     }
 
 
-@app.post("/v1/claims/score", response_model=ClaimScoreResponse, tags=["Scoring"])
+@app.post("/v1/claims/score",
+          response_model=ClaimScoreResponse,
+          tags=["Scoring"])
 async def score_claim(claim: ClaimScoreRequest):
     """
     Score a single claim for fraud probability and approval recommendation.
@@ -308,7 +312,8 @@ async def score_claim(claim: ClaimScoreRequest):
     bpp = claim.billed_per_procedure or (
         claim.billed_amount / max(claim.n_procedures, 1)
     )
-    ar = claim.allowed_ratio or (claim.allowed_amount / max(claim.billed_amount, 0.01))
+    ar = claim.allowed_ratio or (
+        claim.allowed_amount / max(claim.billed_amount, 0.01))
     claim_dict = claim.dict()
     claim_dict["billed_per_procedure"] = bpp
     claim_dict["allowed_ratio"] = min(ar, 1.0)
@@ -321,10 +326,13 @@ async def score_claim(claim: ClaimScoreRequest):
                 _fraud_model["imputer"].transform(X),
                 columns=_fraud_model["feature_cols"],
             )
-            fraud_score = float(_fraud_model["model"].predict_proba(X_imp)[0, 1])
+            fraud_score = float(
+                _fraud_model["model"].predict_proba(X_imp)[
+                    0, 1])
             top_reasons = []  # Would populate from SHAP in production
         except Exception as e:
-            log.warning(f"ML fraud score failed ({e}), falling back to demo scorer")
+            log.warning(
+                f"ML fraud score failed ({e}), falling back to demo scorer")
             result = _demo_score(claim)
             fraud_score = result["fraud_score"]
             top_reasons = result["reasons"]
@@ -409,8 +417,8 @@ async def get_explanation(claim_id: str):
     """
     if claim_id not in _score_cache:
         raise HTTPException(
-            status_code=404, detail=f"Claim {claim_id} has not been scored yet."
-        )
+            status_code=404,
+            detail=f"Claim {claim_id} has not been scored yet.")
 
     cached = _score_cache[claim_id]
     fraud_score = cached["fraud_score"]
@@ -430,20 +438,21 @@ async def get_explanation(claim_id: str):
     }
 
 
-def _generate_nl_explanation(claim_id: str, score: float, reasons: list) -> str:
+def _generate_nl_explanation(
+        claim_id: str,
+        score: float,
+        reasons: list) -> str:
     band = _fraud_risk_band(score)
     if not reasons:
         return (
             f"Claim {claim_id} received a fraud score of {score:.2f} ({band} risk). "
-            f"No specific high-weight risk factors were identified."
-        )
+            f"No specific high-weight risk factors were identified.")
     top = reasons[0]
     return (
         f"Claim {claim_id} received a fraud score of {score:.2f} ({band} risk). "
         f"The primary driver is '{top['feature']}' "
         f"(value: {top.get('value','N/A')}), which {top.get('description','is anomalous')}. "
-        f"This claim is recommended for {_get_recommendation(band, 1-score)}."
-    )
+        f"This claim is recommended for {_get_recommendation(band, 1-score)}.")
 
 
 @app.get("/v1/providers/{npi}/risk-profile", tags=["Risk Profiles"])

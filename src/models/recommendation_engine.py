@@ -39,7 +39,8 @@ try:
     HAS_SKLEARN = True
 except ImportError:
     HAS_SKLEARN = False
-    log.warning("scikit-learn not available — recommendation engine in demo mode")
+    log.warning(
+        "scikit-learn not available — recommendation engine in demo mode")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -157,7 +158,9 @@ class ContentBasedScorer:
         needs_mental = member.get("needs_mental_health", False)
         needs_dental = member.get("needs_dental", False)
         needs_vision = member.get("needs_vision", False)
-        budget_priority = member.get("budget_priority", False)  # prefers low premium
+        budget_priority = member.get(
+            "budget_priority",
+            False)  # prefers low premium
         low_deductible = (
             chronic > 2 or prior_claims > 15
         )  # high utilizer → low deductible
@@ -229,7 +232,8 @@ class CollaborativeFilteringScorer:
         self.member_plans: Dict[str, str] = {}  # member_id → current plan_id
         self._fitted = False
 
-    def fit(self, members_df: pd.DataFrame, interactions_df: pd.DataFrame) -> None:
+    def fit(self, members_df: pd.DataFrame,
+            interactions_df: pd.DataFrame) -> None:
         """
         Fit KNN on member feature matrix.
         interactions_df: member_id, plan_id (plan chosen / renewed)
@@ -245,8 +249,11 @@ class CollaborativeFilteringScorer:
         X_scaled = self.scaler.fit_transform(X)
 
         self.knn = NearestNeighbors(
-            n_neighbors=min(self.k, len(X)), metric="euclidean", algorithm="auto"
-        )
+            n_neighbors=min(
+                self.k,
+                len(X)),
+            metric="euclidean",
+            algorithm="auto")
         self.knn.fit(X_scaled)
         self.member_matrix = X_scaled
         self.member_ids = members_df["member_id"].tolist()
@@ -259,13 +266,16 @@ class CollaborativeFilteringScorer:
         self._fitted = True
         log.info(f"CF scorer fitted on {len(self.member_ids)} members")
 
-    def recommend(self, member_features: Dict, plans: pd.DataFrame) -> pd.Series:
+    def recommend(
+            self,
+            member_features: Dict,
+            plans: pd.DataFrame) -> pd.Series:
         """Score plans based on similar members' choices."""
         if not self._fitted or not HAS_SKLEARN:
             return pd.Series({pid: 0.5 for pid in plans["plan_id"]})
 
-        available = [f for f in self._feature_cols if f in member_features]
-        X_member = np.array([[member_features.get(f, 0) for f in self._feature_cols]])
+        X_member = np.array([[member_features.get(f, 0)
+                            for f in self._feature_cols]])
         X_scaled = self.scaler.transform(X_member)
 
         distances, indices = self.knn.kneighbors(X_scaled)
@@ -276,14 +286,16 @@ class CollaborativeFilteringScorer:
             neighbor_plan = self.member_plans.get(neighbor_id)
             if neighbor_plan:
                 weight = 1.0 / max(dist + 0.01, 0.001)
-                plan_votes[neighbor_plan] = plan_votes.get(neighbor_plan, 0) + weight
+                plan_votes[neighbor_plan] = plan_votes.get(
+                    neighbor_plan, 0) + weight
 
         # Normalize to [0, 1]
         if plan_votes:
             max_votes = max(plan_votes.values())
             plan_votes = {k: v / max_votes for k, v in plan_votes.items()}
 
-        return pd.Series({pid: plan_votes.get(pid, 0.0) for pid in plans["plan_id"]})
+        return pd.Series({pid: plan_votes.get(pid, 0.0)
+                         for pid in plans["plan_id"]})
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -300,7 +312,10 @@ class PlanRecommender:
       - collab_weight    = 0.4  (similar members' choices)
     """
 
-    def __init__(self, content_weight: float = 0.6, collab_weight: float = 0.4):
+    def __init__(
+            self,
+            content_weight: float = 0.6,
+            collab_weight: float = 0.4):
         self.content_weight = content_weight
         self.collab_weight = collab_weight
         self.content_scorer = ContentBasedScorer()
@@ -338,8 +353,10 @@ class PlanRecommender:
         )
 
     def recommend(
-        self, member_id: str = None, member_features: Dict = None, top_n: int = 3
-    ) -> List[Dict]:
+            self,
+            member_id: str = None,
+            member_features: Dict = None,
+            top_n: int = 3) -> List[Dict]:
         """
         Get top-N plan recommendations.
 
@@ -362,9 +379,7 @@ class PlanRecommender:
         cf_scores = self.cf_scorer.recommend(member_features, self.plans)
 
         # Hybrid score
-        hybrid_scores = (
-            self.content_weight * content_scores + self.collab_weight * cf_scores
-        ).sort_values(ascending=False)
+        hybrid_scores = (self.content_weight * content_scores + self.collab_weight * cf_scores).sort_values(ascending=False)
 
         results = []
         for plan_id in hybrid_scores.head(top_n).index:
@@ -384,13 +399,25 @@ class PlanRecommender:
                     "plan_type": plan["plan_type"],
                     "monthly_premium": plan["monthly_premium"],
                     "deductible": plan["deductible"],
-                    "hybrid_score": round(float(hybrid_scores[plan_id]), 4),
-                    "content_score": round(float(content_scores.get(plan_id, 0)), 4),
-                    "cf_score": round(float(cf_scores.get(plan_id, 0)), 4),
+                    "hybrid_score": round(
+                        float(
+                            hybrid_scores[plan_id]),
+                        4),
+                    "content_score": round(
+                        float(
+                            content_scores.get(
+                                plan_id,
+                                0)),
+                        4),
+                    "cf_score": round(
+                        float(
+                            cf_scores.get(
+                                plan_id,
+                                0)),
+                        4),
                     "reason": reason,
                     "rank": len(results) + 1,
-                }
-            )
+                })
 
         return results
 
@@ -420,11 +447,14 @@ class PlanRecommender:
         if cf_score > 0.6:
             reasons.append("popular with members who have a similar profile")
         if not reasons:
-            reasons.append(f"strong overall match for your health profile")
+            reasons.append("strong overall match for your health profile")
 
         return "Recommended because: " + "; ".join(reasons) + "."
 
-    def get_ndcg(self, recommendations: List[Dict], relevant_plan: str) -> float:
+    def get_ndcg(
+            self,
+            recommendations: List[Dict],
+            relevant_plan: str) -> float:
         """
         Compute NDCG@N — relevance metric for recommendation quality.
         relevant_plan: the plan the member actually chose (ground truth).

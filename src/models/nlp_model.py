@@ -49,8 +49,6 @@ except ImportError:
     HAS_SKLEARN_NLP = False
 
 try:
-    from transformers import pipeline as hf_pipeline
-
     HAS_TRANSFORMERS = True
 except ImportError:
     HAS_TRANSFORMERS = False

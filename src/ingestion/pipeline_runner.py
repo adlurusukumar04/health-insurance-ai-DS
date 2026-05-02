@@ -14,18 +14,14 @@ Usage:
     python src/ingestion/pipeline_runner.py [--source synthetic|s3] [--env dev|prod]
 """
 
+import os
 import argparse
 import logging
-import os
-import sys
 from datetime import datetime
 
 import pandas as pd
-
-# ── Add project root to path ──────────────────────────────────────────────────
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
-from src.compliance.anonymizer import Anonymizer
 from src.processing.feature_engineering import FeatureEngineer
+from src.compliance.anonymizer import Anonymizer
 
 logging.basicConfig(
     level=logging.INFO,
@@ -86,7 +82,11 @@ def check_data_quality(df: pd.DataFrame, name: str) -> dict:
         "name": name,
         "rows": len(df),
         "duplicates": int(dup_count),
-        "null_pct": {k: round(v * 100, 2) for k, v in null_pct.items() if v > 0},
+        "null_pct": {
+            k: round(
+                v * 100,
+                2) for k,
+            v in null_pct.items() if v > 0},
     }
     if dup_count > 0:
         log.warning(f"[{name}] Found {dup_count} duplicate rows")
@@ -105,15 +105,19 @@ def load_synthetic() -> dict:
     log.info("Loading synthetic data from data/synthetic/")
     return {
         "claims": pd.read_csv(
-            f"{SYNTHETIC_DIR}/claims.csv", parse_dates=["claim_date", "service_date"]
-        ),
+            f"{SYNTHETIC_DIR}/claims.csv",
+            parse_dates=[
+                "claim_date",
+                "service_date"]),
         "members": pd.read_csv(
-            f"{SYNTHETIC_DIR}/members.csv", parse_dates=["dob", "plan_start_date"]
-        ),
+            f"{SYNTHETIC_DIR}/members.csv",
+            parse_dates=[
+                "dob",
+                "plan_start_date"]),
         "providers": pd.read_csv(f"{SYNTHETIC_DIR}/providers.csv"),
         "pharmacy": pd.read_csv(
-            f"{SYNTHETIC_DIR}/pharmacy.csv", parse_dates=["fill_date"]
-        ),
+            f"{SYNTHETIC_DIR}/pharmacy.csv",
+            parse_dates=["fill_date"]),
     }
 
 
@@ -229,8 +233,20 @@ def run_pipeline(source: str = "synthetic", env: str = "dev") -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Health Insurance AI Pipeline Runner")
-    parser.add_argument("--source", default="synthetic", choices=["synthetic", "s3"])
-    parser.add_argument("--env", default="dev", choices=["dev", "staging", "prod"])
+    parser = argparse.ArgumentParser(
+        description="Health Insurance AI Pipeline Runner")
+    parser.add_argument(
+        "--source",
+        default="synthetic",
+        choices=[
+            "synthetic",
+            "s3"])
+    parser.add_argument(
+        "--env",
+        default="dev",
+        choices=[
+            "dev",
+            "staging",
+            "prod"])
     args = parser.parse_args()
     run_pipeline(source=args.source, env=args.env)
