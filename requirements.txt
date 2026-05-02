@@ -1,63 +1,62 @@
 # Core
-numpy==1.26.4
-pandas==2.2.1
-scipy==1.13.0
+numpy>=1.26.4
+pandas>=2.2.1
+scipy>=1.13.0
 
 # Machine Learning
-scikit-learn==1.4.2
-xgboost==2.0.3
-lightgbm==4.3.0
-imbalanced-learn==0.12.2
-mlxtend==0.23.1
-
-# Deep Learning
-tensorflow==2.16.1
-keras==3.3.3
-torch==2.3.0
-torchvision==0.18.0
-
-# NLP
-transformers==4.40.1
-spacy==3.7.4
-nltk==3.8.1
-sentence-transformers==2.7.0
+scikit-learn>=1.4.2
+xgboost>=2.0.3
+lightgbm>=4.3.0
+imbalanced-learn>=0.12.2
+joblib>=1.4.0
 
 # API & Deployment
-fastapi==0.111.0
-uvicorn==0.29.0
-pydantic==2.7.1
-httpx==0.27.0
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.7.1
+httpx>=0.27.0
+python-multipart>=0.0.9
 
-# Cloud
-boto3==1.34.95
-azure-ai-ml==1.16.0
-azure-storage-blob==12.19.1
-sagemaker==2.216.0
+# NLP
+spacy>=3.7.4
+nltk>=3.8.1
+
+# Cloud — AWS
+boto3>=1.34.95
 
 # Database
-psycopg2-binary==2.9.9
-pymongo==4.7.2
+sqlalchemy>=2.0.29
+psycopg2-binary>=2.9.9
+redis>=5.0.4
 
-
-# Pipeline
-apache-airflow==2.9.1
-
-# Data generation & processing
-faker==24.11.0
-pyarrow==16.0.0
+# Data processing
+faker>=24.11.0
+pyarrow>=16.0.0
 
 # Visualization
-matplotlib==3.8.4
-seaborn==0.13.2
-plotly==5.21.0
+matplotlib>=3.8.4
+seaborn>=0.13.2
+plotly>=5.21.0
 
-# Compliance & Security
-cryptography==42.0.7
+# Explainability
+shap>=0.45.0
+
+# Security
+cryptography>=42.0.7
+
+# MLOps
+mlflow>=2.12.0
 
 # Testing
-pytest==8.2.0
-pytest-cov==5.0.0
+pytest>=8.2.0
+pytest-cov>=5.0.0
+pytest-asyncio>=0.23.0
+
+# Code Quality
+black>=24.4.0
+isort>=5.13.0
+flake8>=7.0.0
 
 # Notebook
-jupyter==1.0.0
-ipykernel==6.29.4
+jupyter>=1.0.0
+ipykernel>=6.29.4

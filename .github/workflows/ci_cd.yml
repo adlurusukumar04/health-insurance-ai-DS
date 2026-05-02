@@ -67,10 +67,9 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov pytest-asyncio httpx
 
       - name: Download spaCy model
-        run: python -m spacy download en_core_web_sm
+        run: python -m spacy download en_core_web_sm --quiet
 
       - name: Generate synthetic data for tests
         run: python src/ingestion/generate_synthetic_data.py
