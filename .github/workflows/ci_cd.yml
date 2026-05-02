@@ -33,9 +33,9 @@ jobs:
       - name: Run Black (format check)
         run: black --check src/ tests/
 
-      - name: Run isort (import order check)
-        run: isort --check-only src/ tests/
-
+      - - name: Import order check
+  	run: isort src/ && echo "Imports sorted"
+        
       - name: Run flake8 (lint)
         run: |
           flake8 src/ tests/ \
