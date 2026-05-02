@@ -33,7 +33,7 @@ jobs:
       - name: Run Black (format check)
         run: black --check src/ tests/
 
-      - - name: Import order check
+      - name: Import order check
   	run: isort src/ && echo "Imports sorted"
         
       - name: Run flake8 (lint)
