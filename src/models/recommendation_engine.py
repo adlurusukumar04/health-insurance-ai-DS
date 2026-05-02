@@ -25,16 +25,17 @@ Usage:
 """
 
 import logging
+from typing import Dict, List, Optional, Tuple
+
 import numpy as np
 import pandas as pd
-from typing import List, Dict, Optional, Tuple
 
 log = logging.getLogger(__name__)
 
 try:
-    from sklearn.neighbors import NearestNeighbors
-    from sklearn.preprocessing import MinMaxScaler, LabelEncoder
     from sklearn.metrics.pairwise import cosine_similarity
+    from sklearn.neighbors import NearestNeighbors
+    from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
     HAS_SKLEARN = True
 except ImportError:

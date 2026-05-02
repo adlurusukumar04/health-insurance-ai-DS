@@ -14,10 +14,11 @@ Output: data/synthetic/*.csv
 
 import os
 import random
+from datetime import datetime, timedelta
+
 import numpy as np
 import pandas as pd
 from faker import Faker
-from datetime import datetime, timedelta
 
 fake = Faker()
 random.seed(42)

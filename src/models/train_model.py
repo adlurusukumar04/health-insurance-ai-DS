@@ -1,9 +1,10 @@
+import os
+
+import joblib
 import pandas as pd
 import xgboost as xgb
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
-import joblib
-import os
+from sklearn.model_selection import train_test_split
 
 
 def train_fraud_model():

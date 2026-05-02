@@ -13,13 +13,14 @@ Usage:
                                            --current   data/processed/features_current.parquet
 """
 
-import os
+import argparse
 import json
 import logging
-import argparse
+import os
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
-from datetime import datetime
 
 log = logging.getLogger(__name__)
 ALERT_LOG = "models/reports/monitoring_alerts.jsonl"

@@ -17,34 +17,27 @@ Usage:
     python src/models/fraud_model.py --data data/processed/features_dev.parquet
 """
 
-import os
-import sys
+import argparse
 import json
 import logging
-import argparse
+import os
+import sys
 import warnings
 from datetime import datetime
 
-import numpy as np
-import pandas as pd
 import joblib
 import matplotlib.pyplot as plt
-
-from sklearn.model_selection import StratifiedKFold, cross_val_score
-from sklearn.metrics import (
-    roc_auc_score,
-    precision_score,
-    recall_score,
-    f1_score,
-    classification_report,
-    confusion_matrix,
-    precision_recall_curve,
-    average_precision_score,
-)
-from sklearn.preprocessing import LabelEncoder
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
+import numpy as np
+import pandas as pd
 import xgboost as xgb
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import (average_precision_score, classification_report,
+                             confusion_matrix, f1_score,
+                             precision_recall_curve, precision_score,
+                             recall_score, roc_auc_score)
+from sklearn.model_selection import StratifiedKFold, cross_val_score
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import LabelEncoder
 
 try:
     from imblearn.over_sampling import SMOTE

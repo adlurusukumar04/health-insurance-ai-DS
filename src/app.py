@@ -1,7 +1,7 @@
-import streamlit as st
-import pandas as pd
 import joblib
+import pandas as pd
 import plotly.express as px
+import streamlit as st
 
 # 1. Page Configuration
 st.set_page_config(page_title="AI Fraud Detection Dashboard", layout="wide")

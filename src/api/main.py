@@ -15,17 +15,17 @@ Run locally:
     uvicorn src.api.main:app --reload --port 8000
 """
 
+import json
+import logging
 import os
 import sys
-import json
 import uuid
-import logging
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, status
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, validator

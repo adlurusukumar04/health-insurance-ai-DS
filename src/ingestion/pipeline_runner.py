@@ -14,19 +14,19 @@ Usage:
     python src/ingestion/pipeline_runner.py [--source synthetic|s3] [--env dev|prod]
 """
 
-import os
-import sys
 import argparse
 import logging
+import os
+import sys
 from datetime import datetime
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 # ── Add project root to path ──────────────────────────────────────────────────
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
-from src.processing.feature_engineering import FeatureEngineer
 from src.compliance.anonymizer import Anonymizer
+from src.processing.feature_engineering import FeatureEngineer
 
 logging.basicConfig(
     level=logging.INFO,
@@ -120,8 +120,9 @@ def load_synthetic() -> dict:
 
 def load_s3(bucket: str, prefix: str) -> dict:
     """Load data from AWS S3 (production path)."""
-    import boto3
     from io import BytesIO
+
+    import boto3
 
     s3 = boto3.client("s3")
     datasets = {}

@@ -21,11 +21,11 @@ Usage:
     result = nlp.analyze_note("Patient presented with chest pain...")
 """
 
-import re
 import hashlib
 import logging
-from typing import List, Dict, Optional, Tuple
+import re
 from collections import Counter
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd

@@ -22,9 +22,9 @@ Conditional branches:
 from datetime import datetime, timedelta
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator, BranchPythonOperator
-from airflow.operators.empty import EmptyOperator
 from airflow.operators.email import EmailOperator
+from airflow.operators.empty import EmptyOperator
+from airflow.operators.python import BranchPythonOperator, PythonOperator
 from airflow.utils.trigger_rule import TriggerRule
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -52,9 +52,10 @@ DEFAULT_ARGS = {
 def ingest_data(**context):
     """Pull yesterday's claims from S3 data lake."""
     import logging
+    from io import BytesIO
+
     import boto3
     import pandas as pd
-    from io import BytesIO
 
     log = logging.getLogger(__name__)
     execution_date = context["ds"]  # e.g. "2024-06-15"
@@ -95,8 +96,8 @@ def validate_quality(**context):
 def anonymize_phi(**context):
     """Apply HIPAA Safe Harbor anonymization."""
     import logging
-    import sys
     import os
+    import sys
 
     sys.path.insert(0, "/app")
 
