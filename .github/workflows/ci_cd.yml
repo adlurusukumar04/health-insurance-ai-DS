@@ -115,7 +115,7 @@ jobs:
       - name: Install ML dependencies
         run: |
           pip install --upgrade pip
-          pip install numpy pandas scikit-learn xgboost faker pyarrow
+          pip install -r requirements.txt
 
       - name: Generate data & run pipeline
         run: |
