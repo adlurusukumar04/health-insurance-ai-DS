@@ -36,8 +36,7 @@ jobs:
       - name: Run isort (auto-format)
         run: isort src/ tests/
 
-      - name: Run isort (auto-format)
-        run: isort src/ tests/
+      - name: Run flake8 (lint)
         run: |
           flake8 src/ tests/ \
             --max-line-length=120 \
