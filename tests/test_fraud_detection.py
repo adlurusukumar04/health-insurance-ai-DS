@@ -20,8 +20,8 @@ import pandas as pd
 import pytest
 
 from src.compliance.anonymizer import Anonymizer  # noqa: E402
-from src.monitoring.model_monitor import (compute_psi,  # noqa: E402
-                                          monitor_feature_drift)
+from src.monitoring.model_monitor import compute_psi  # noqa: E402
+from src.monitoring.model_monitor import monitor_feature_drift
 from src.processing.feature_engineering import FeatureEngineer  # noqa: E402
 
 # ─────────────────────────────────────────────────────────────────────────────

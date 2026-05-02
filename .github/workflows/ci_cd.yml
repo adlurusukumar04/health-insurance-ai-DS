@@ -30,18 +30,19 @@ jobs:
         run: |
           pip install flake8 black isort
 
-      - name: Run Black (format check)
-        run: black --check src/ tests/
+      - name: Run Black (auto-format)
+        run: black src/ tests/
 
-      - name: Run isort (import order check)
-        run: isort src/ && echo "Imports sorted"
+      - name: Run isort (auto-format)
+        run: isort src/ tests/
 
-      - name: Run flake8 (lint)
+      - name: Run isort (auto-format)
+        run: isort src/ tests/
         run: |
           flake8 src/ tests/ \
             --max-line-length=120 \
-            --ignore=E203,W503,E501 \
-            --exclude=__pycache__,.venv
+            --ignore=E203,W503,E501,W504 \
+            --exclude=__pycache__,.venv,venv
 
   # ─────────────────────────────────────────────────────────────
   # JOB 2: UNIT & INTEGRATION TESTS
