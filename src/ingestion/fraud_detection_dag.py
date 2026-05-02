@@ -22,7 +22,6 @@ Conditional branches:
 from datetime import datetime, timedelta
 
 from airflow import DAG
-from airflow.operators.email import EmailOperator
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import BranchPythonOperator, PythonOperator
 from airflow.utils.trigger_rule import TriggerRule

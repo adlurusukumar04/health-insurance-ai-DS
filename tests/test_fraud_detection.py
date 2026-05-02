@@ -17,11 +17,9 @@ Run:
 
 import os
 import sys
-import json
 import pytest
 import numpy as np
 import pandas as pd
-from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 

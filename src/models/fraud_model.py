@@ -21,7 +21,6 @@ import argparse
 import json
 import logging
 import os
-import sys
 import warnings
 from datetime import datetime
 
@@ -42,8 +41,6 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 from sklearn.model_selection import StratifiedKFold, cross_val_score
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import LabelEncoder
 
 try:
     from imblearn.over_sampling import SMOTE

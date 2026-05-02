@@ -15,19 +15,15 @@ Run locally:
     uvicorn src.api.main:app --reload --port 8000
 """
 
-import json
 import logging
-import os
 import sys
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
-import numpy as np
 import pandas as pd
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, status
+from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, validator
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))

@@ -25,7 +25,7 @@ Usage:
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -33,9 +33,8 @@ import pandas as pd
 log = logging.getLogger(__name__)
 
 try:
-    from sklearn.metrics.pairwise import cosine_similarity
     from sklearn.neighbors import NearestNeighbors
-    from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+    from sklearn.preprocessing import MinMaxScaler
 
     HAS_SKLEARN = True
 except ImportError:
