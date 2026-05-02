@@ -54,8 +54,9 @@ class Anonymizer:
         log.info("Applying HIPAA Safe Harbor anonymization to members...")
 
         # 1. Remove direct identifiers (names)
-        df = self._drop_if_exists(df, ["first_name", "last_name", "email",
-                                        "phone", "ssn", "address"])
+        df = self._drop_if_exists(
+            df, ["first_name", "last_name", "email", "phone", "ssn", "address"]
+        )
 
         # 2. Hash member_id → pseudonymous token (preserves join-ability)
         if "member_id" in df.columns:
@@ -111,6 +112,7 @@ class Anonymizer:
         """Convert DOB to decade age band (e.g. '40s')."""
         try:
             from datetime import datetime
+
             age = (datetime.now().date() - pd.to_datetime(dob).date()).days // 365
             decade = (age // 10) * 10
             return f"{decade}s"
@@ -127,7 +129,18 @@ class Anonymizer:
         try:
             z = str(zip_code).zfill(5)[:3]
             # Known sparse ZIP3 prefixes (simplified — use full table in production)
-            sparse_zip3 = {"036", "059", "063", "102", "203", "556", "692", "790", "821", "823"}
+            sparse_zip3 = {
+                "036",
+                "059",
+                "063",
+                "102",
+                "203",
+                "556",
+                "692",
+                "790",
+                "821",
+                "823",
+            }
             return "000" if z in sparse_zip3 else z
         except Exception:
             return "000"

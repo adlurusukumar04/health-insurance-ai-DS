@@ -32,14 +32,14 @@ from airflow.utils.trigger_rule import TriggerRule
 # ─────────────────────────────────────────────────────────────────────────────
 
 DEFAULT_ARGS = {
-    "owner":            "data-science-team",
-    "depends_on_past":  False,
-    "start_date":       datetime(2024, 1, 1),
-    "email":            ["ds-alerts@your-org.com"],
+    "owner": "data-science-team",
+    "depends_on_past": False,
+    "start_date": datetime(2024, 1, 1),
+    "email": ["ds-alerts@your-org.com"],
     "email_on_failure": True,
-    "email_on_retry":   False,
-    "retries":          2,
-    "retry_delay":      timedelta(minutes=10),
+    "email_on_retry": False,
+    "retries": 2,
+    "retry_delay": timedelta(minutes=10),
     "execution_timeout": timedelta(hours=2),
 }
 
@@ -47,6 +47,7 @@ DEFAULT_ARGS = {
 # ─────────────────────────────────────────────────────────────────────────────
 # PYTHON CALLABLES
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def ingest_data(**context):
     """Pull yesterday's claims from S3 data lake."""
@@ -56,7 +57,7 @@ def ingest_data(**context):
     from io import BytesIO
 
     log = logging.getLogger(__name__)
-    execution_date = context["ds"]                     # e.g. "2024-06-15"
+    execution_date = context["ds"]  # e.g. "2024-06-15"
     bucket = "health-insurance-ai-data"
     prefix = f"raw/claims/dt={execution_date}"
 
@@ -73,16 +74,19 @@ def ingest_data(**context):
 def validate_quality(**context):
     """Run schema validation and data quality checks."""
     import logging
+
     log = logging.getLogger(__name__)
     partition_date = context["task_instance"].xcom_pull(key="partition_date")
     log.info(f"Validating data quality for {partition_date}")
 
     # Simulate quality check
     quality_ok = True
-    null_pct   = 0.02   # 2% nulls — within tolerance
+    null_pct = 0.02  # 2% nulls — within tolerance
 
     if null_pct > 0.10:
-        raise ValueError(f"Data quality FAILED: null rate {null_pct:.1%} exceeds 10% threshold")
+        raise ValueError(
+            f"Data quality FAILED: null rate {null_pct:.1%} exceeds 10% threshold"
+        )
 
     log.info(f"Data quality OK — null rate: {null_pct:.1%}")
     return {"quality_ok": quality_ok, "null_pct": null_pct}
@@ -93,9 +97,11 @@ def anonymize_phi(**context):
     import logging
     import sys
     import os
+
     sys.path.insert(0, "/app")
 
     from src.compliance.anonymizer import Anonymizer
+
     log = logging.getLogger(__name__)
     log.info("Applying HIPAA anonymization to member data")
     # In production: read from S3, anonymize, write back
@@ -105,6 +111,7 @@ def anonymize_phi(**context):
 def engineer_features(**context):
     """Build feature matrix from cleaned data."""
     import logging
+
     log = logging.getLogger(__name__)
     partition_date = context["task_instance"].xcom_pull(key="partition_date")
     log.info(f"Engineering features for {partition_date}")
@@ -116,15 +123,18 @@ def engineer_features(**context):
 def score_batch_claims(**context):
     """Run fraud model on overnight claim batch."""
     import logging
+
     log = logging.getLogger(__name__)
     log.info("Scoring overnight claim batch")
 
     # In production: call FastAPI /v1/claims/batch-score
-    high_risk_count  = 37
-    total_claims     = 5000
+    high_risk_count = 37
+    total_claims = 5000
     fraud_alert_rate = high_risk_count / total_claims
 
-    log.info(f"Batch scoring complete — {total_claims} claims | {high_risk_count} high-risk alerts")
+    log.info(
+        f"Batch scoring complete — {total_claims} claims | {high_risk_count} high-risk alerts"
+    )
 
     context["task_instance"].xcom_push(key="high_risk_count", value=high_risk_count)
     context["task_instance"].xcom_push(key="fraud_alert_rate", value=fraud_alert_rate)
@@ -134,6 +144,7 @@ def score_batch_claims(**context):
 def run_model_monitor(**context):
     """Check for model drift and performance degradation."""
     import logging
+
     log = logging.getLogger(__name__)
     log.info("Running model monitoring checks")
 
@@ -142,7 +153,9 @@ def run_model_monitor(**context):
 
     context["task_instance"].xcom_push(key="max_psi", value=max_psi)
     context["task_instance"].xcom_push(key="needs_retrain", value=(max_psi >= 0.25))
-    log.info(f"Model monitoring complete — max PSI: {max_psi} | retrain needed: {max_psi >= 0.25}")
+    log.info(
+        f"Model monitoring complete — max PSI: {max_psi} | retrain needed: {max_psi >= 0.25}"
+    )
     return {"max_psi": max_psi, "needs_retrain": max_psi >= 0.25}
 
 
@@ -157,6 +170,7 @@ def branch_on_drift(**context):
 def trigger_retraining(**context):
     """Trigger model retraining DAG via Airflow API."""
     import logging
+
     log = logging.getLogger(__name__)
     log.info("DRIFT DETECTED — Triggering model retraining DAG")
     # In production: trigger via Airflow REST API or TriggerDagRunOperator
@@ -167,19 +181,20 @@ def trigger_retraining(**context):
 def generate_report(**context):
     """Generate daily fraud summary report."""
     import logging
+
     log = logging.getLogger(__name__)
-    partition_date   = context["task_instance"].xcom_pull(key="partition_date")
-    high_risk_count  = context["task_instance"].xcom_pull(key="high_risk_count")
+    partition_date = context["task_instance"].xcom_pull(key="partition_date")
+    high_risk_count = context["task_instance"].xcom_pull(key="high_risk_count")
     fraud_alert_rate = context["task_instance"].xcom_pull(key="fraud_alert_rate")
 
     report = {
-        "date":             partition_date,
-        "total_claims":     5000,
+        "date": partition_date,
+        "total_claims": 5000,
         "high_risk_alerts": high_risk_count,
-        "alert_rate":       f"{(fraud_alert_rate or 0)*100:.2f}%",
-        "auto_approved":    4500,
-        "sent_to_review":   463,
-        "flagged_for_siu":  high_risk_count,
+        "alert_rate": f"{(fraud_alert_rate or 0)*100:.2f}%",
+        "auto_approved": 4500,
+        "sent_to_review": 463,
+        "flagged_for_siu": high_risk_count,
     }
     log.info(f"Daily Report: {report}")
     return report
@@ -188,10 +203,13 @@ def generate_report(**context):
 def notify_siu_if_critical(**context):
     """Send immediate SIU notification for very high risk claims."""
     import logging
+
     log = logging.getLogger(__name__)
     high_risk = context["task_instance"].xcom_pull(key="high_risk_count") or 0
     if high_risk > 50:
-        log.warning(f"SIU ALERT: {high_risk} high-risk claims require immediate review!")
+        log.warning(
+            f"SIU ALERT: {high_risk} high-risk claims require immediate review!"
+        )
         # In production: send Slack / PagerDuty / email
     log.info("SIU notification check complete")
 
@@ -204,14 +222,14 @@ with DAG(
     dag_id="health_insurance_fraud_detection_daily",
     default_args=DEFAULT_ARGS,
     description="Daily health insurance fraud detection pipeline",
-    schedule_interval="0 2 * * *",    # 02:00 UTC daily
+    schedule_interval="0 2 * * *",  # 02:00 UTC daily
     catchup=False,
     max_active_runs=1,
     tags=["fraud-detection", "health-insurance", "ml", "daily"],
 ) as dag:
 
     start = EmptyOperator(task_id="start")
-    end   = EmptyOperator(task_id="end", trigger_rule=TriggerRule.ALL_DONE)
+    end = EmptyOperator(task_id="end", trigger_rule=TriggerRule.ALL_DONE)
 
     t_ingest = PythonOperator(
         task_id="ingest_data",
@@ -267,7 +285,7 @@ with DAG(
         >> t_branch
     )
 
-    t_branch  >> t_retrain >> t_report
-    t_branch  >> t_report
+    t_branch >> t_retrain >> t_report
+    t_branch >> t_report
 
-    t_report  >> t_notify_siu >> end
+    t_report >> t_notify_siu >> end
