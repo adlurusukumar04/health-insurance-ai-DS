@@ -12,6 +12,7 @@ Feature families:
 """
 
 import logging
+
 import numpy as np
 import pandas as pd
 
@@ -69,8 +70,9 @@ class FeatureEngineer:
         df["cpt_code_count"] = df["n_procedures"]
 
         # Amount features
-        df["billed_per_procedure"] = df["billed_amount"] / \
-            df["n_procedures"].clip(lower=1)
+        df["billed_per_procedure"] = df["billed_amount"] / df["n_procedures"].clip(
+            lower=1
+        )
         df["allowed_ratio"] = (
             df["allowed_amount"] / df["billed_amount"].clip(lower=0.01)
         ).clip(0, 1)
@@ -90,8 +92,7 @@ class FeatureEngineer:
 
         # Place of service risk encoding
         high_risk_pos = {"23", "81"}  # Emergency, Independent Lab
-        df["high_risk_pos"] = df["place_of_service"].isin(
-            high_risk_pos).astype(int)
+        df["high_risk_pos"] = df["place_of_service"].isin(high_risk_pos).astype(int)
 
         return df
 
@@ -119,12 +120,9 @@ class FeatureEngineer:
         # Derived provider features
         df["oig_excluded"] = df["oig_excluded"].fillna(False).astype(int)
         df["license_active"] = df["license_active"].fillna(True).astype(int)
-        df["peer_percentile_high"] = (
-            df["peer_billing_percentile"] > 90).astype(int)
-        df["peer_percentile_extreme"] = (
-            df["peer_billing_percentile"] > 95).astype(int)
-        df["peer_billing_percentile"] = df["peer_billing_percentile"].fillna(
-            50)
+        df["peer_percentile_high"] = (df["peer_billing_percentile"] > 90).astype(int)
+        df["peer_percentile_extreme"] = (df["peer_billing_percentile"] > 95).astype(int)
+        df["peer_billing_percentile"] = df["peer_billing_percentile"].fillna(50)
         df["years_practice"] = df["years_practice"].fillna(5)
 
         # Provider claim volume from claims data itself
@@ -148,8 +146,7 @@ class FeatureEngineer:
             "Radiology": 2,
             "Family Practice": 1,
         }
-        df["specialty_risk_score"] = df["specialty"].map(
-            specialty_risk).fillna(2)
+        df["specialty_risk_score"] = df["specialty"].map(specialty_risk).fillna(2)
 
         return df
 
@@ -157,10 +154,7 @@ class FeatureEngineer:
     # MEMBER-LEVEL FEATURES
     # ─────────────────────────────────────────────────────────
 
-    def _member_features(
-            self,
-            df: pd.DataFrame,
-            members: pd.DataFrame) -> pd.DataFrame:
+    def _member_features(self, df: pd.DataFrame, members: pd.DataFrame) -> pd.DataFrame:
         log.info("  → Member-level features")
 
         mem_cols = [
@@ -176,13 +170,11 @@ class FeatureEngineer:
 
         # Age risk bands
         df["age_risk"] = pd.cut(
-            df["age"].fillna(40), bins=[
-                0, 18, 35, 55, 70, 120], labels=[
-                1, 2, 3, 4, 5]).astype(float)
+            df["age"].fillna(40), bins=[0, 18, 35, 55, 70, 120], labels=[1, 2, 3, 4, 5]
+        ).astype(float)
 
         # Gender encode
-        df["gender_encoded"] = df["gender"].map(
-            {"M": 0, "F": 1, "Other": 2}).fillna(2)
+        df["gender_encoded"] = df["gender"].map({"M": 0, "F": 1, "Other": 2}).fillna(2)
 
         # Plan type risk
         plan_risk = {"HMO": 1, "PPO": 2, "EPO": 2, "POS": 3, "HDHP": 4}
@@ -190,8 +182,7 @@ class FeatureEngineer:
 
         # High prior claim frequency
         df["high_prior_claims"] = (df["prior_claims_12m"] > 20).astype(int)
-        df["address_instability"] = (
-            df["address_changes_12m"] >= 2).astype(int)
+        df["address_instability"] = (df["address_changes_12m"] >= 2).astype(int)
 
         # Member visit diversity (distinct providers per member)
         member_providers = (
@@ -200,12 +191,12 @@ class FeatureEngineer:
             .rename("member_distinct_providers")
         )
         df = df.join(member_providers, on="member_id")
-        df["many_providers"] = (
-            df["member_distinct_providers"] > 8).astype(int)
+        df["many_providers"] = (df["member_distinct_providers"] > 8).astype(int)
 
         # Total spend per member
-        member_spend = (df.groupby("member_id")[
-            "billed_amount"].sum().rename("member_total_billed"))
+        member_spend = (
+            df.groupby("member_id")["billed_amount"].sum().rename("member_total_billed")
+        )
         df = df.join(member_spend, on="member_id")
 
         return df
@@ -229,8 +220,7 @@ class FeatureEngineer:
             df["service_to_claim_days"] = (
                 df["claim_date"] - df["service_date"]
             ).dt.days.clip(0, 365)
-            df["suspicious_lag"] = (
-                df["service_to_claim_days"] > 90).astype(int)
+            df["suspicious_lag"] = (df["service_to_claim_days"] > 90).astype(int)
 
         # Rolling 30-day claim count per provider
         df_sorted = df.sort_values(["provider_npi", "claim_date"])

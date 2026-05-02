@@ -51,6 +51,7 @@ DEFAULT_ARGS = {
 def ingest_data(**context):
     """Pull yesterday's claims from S3 data lake."""
     import logging
+
     pass  # imports removed - using demo mode
 
     log = logging.getLogger(__name__)
@@ -58,15 +59,13 @@ def ingest_data(**context):
     bucket = "health-insurance-ai-data"
     prefix = f"raw/claims/dt={execution_date}"
 
-    log.info(
-        f"Ingesting claims for {execution_date} from s3://{bucket}/{prefix}")
+    log.info(f"Ingesting claims for {execution_date} from s3://{bucket}/{prefix}")
     # s3 = boto3.client("s3")
     # ... actual S3 pull logic here ...
     log.info("Ingestion complete (demo mode — skipping actual S3)")
 
     # Push partition date to XCom for downstream tasks
-    context["task_instance"].xcom_push(
-        key="partition_date", value=execution_date)
+    context["task_instance"].xcom_push(key="partition_date", value=execution_date)
     return execution_date
 
 
@@ -95,6 +94,7 @@ def anonymize_phi(**context):
     """Apply HIPAA Safe Harbor anonymization."""
     import logging
     import sys
+
     pass  # imports removed - using demo mode
 
     sys.path.insert(0, "/app")
@@ -133,11 +133,8 @@ def score_batch_claims(**context):
         f"Batch scoring complete — {total_claims} claims | {high_risk_count} high-risk alerts"
     )
 
-    context["task_instance"].xcom_push(
-        key="high_risk_count", value=high_risk_count)
-    context["task_instance"].xcom_push(
-        key="fraud_alert_rate",
-        value=fraud_alert_rate)
+    context["task_instance"].xcom_push(key="high_risk_count", value=high_risk_count)
+    context["task_instance"].xcom_push(key="fraud_alert_rate", value=fraud_alert_rate)
     return {"high_risk": high_risk_count, "total": total_claims}
 
 
@@ -152,9 +149,7 @@ def run_model_monitor(**context):
     max_psi = 0.08  # within threshold
 
     context["task_instance"].xcom_push(key="max_psi", value=max_psi)
-    context["task_instance"].xcom_push(
-        key="needs_retrain", value=(
-            max_psi >= 0.25))
+    context["task_instance"].xcom_push(key="needs_retrain", value=(max_psi >= 0.25))
     log.info(
         f"Model monitoring complete — max PSI: {max_psi} | retrain needed: {max_psi >= 0.25}"
     )
@@ -187,8 +182,7 @@ def generate_report(**context):
     log = logging.getLogger(__name__)
     partition_date = context["task_instance"].xcom_pull(key="partition_date")
     high_risk_count = context["task_instance"].xcom_pull(key="high_risk_count")
-    fraud_alert_rate = context["task_instance"].xcom_pull(
-        key="fraud_alert_rate")
+    fraud_alert_rate = context["task_instance"].xcom_pull(key="fraud_alert_rate")
 
     report = {
         "date": partition_date,
