@@ -1,0 +1,14 @@
+venv/
+.venv/
+env/
+*.pyc
+__pycache__/
+.env
+models/saved/
+data/synthetic/
+data/processed/
+.pytest_cache/
+htmlcov/
+.coverage
+.vscode/
+*.log
