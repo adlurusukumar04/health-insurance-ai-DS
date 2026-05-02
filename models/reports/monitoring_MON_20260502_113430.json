@@ -1,0 +1,45 @@
+{
+  "run_id": "MON_20260502_113430",
+  "timestamp": "2026-05-02T11:34:30.714297",
+  "total_alerts": 0,
+  "critical_alerts": 0,
+  "feature_drift": {
+    "feature_drift": {
+      "billed_amount": {
+        "psi": 0.0,
+        "status": "OK"
+      },
+      "n_procedures": {
+        "psi": 0.0,
+        "status": "OK"
+      },
+      "peer_billing_percentile": {
+        "psi": 0.0,
+        "status": "OK"
+      },
+      "age": {
+        "psi": 0.0,
+        "status": "OK"
+      },
+      "chronic_conditions": {
+        "psi": 0.0,
+        "status": "OK"
+      },
+      "prior_claims_12m": {
+        "psi": 0.0,
+        "status": "OK"
+      },
+      "billed_per_procedure": {
+        "psi": 0.0,
+        "status": "OK"
+      },
+      "allowed_ratio": {
+        "psi": 0.0,
+        "status": "OK"
+      }
+    },
+    "alerts": []
+  },
+  "performance": {},
+  "recommendation": "OK"
+}
