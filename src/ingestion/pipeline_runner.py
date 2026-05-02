@@ -14,15 +14,13 @@ Usage:
     python src/ingestion/pipeline_runner.py [--source synthetic|s3] [--env dev|prod]
 """
 
-import argparse
-import logging
 import os
-from datetime import datetime
+import sys
 
-import pandas as pd
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from src.compliance.anonymizer import Anonymizer
-from src.processing.feature_engineering import FeatureEngineer
+from src.compliance.anonymizer import Anonymizer  # noqa: E402
+from src.processing.feature_engineering import FeatureEngineer  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,

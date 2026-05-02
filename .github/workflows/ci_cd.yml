@@ -120,11 +120,11 @@ jobs:
       - name: Generate data & run pipeline
         run: |
           python src/ingestion/generate_synthetic_data.py
-          python src/ingestion/pipeline_runner.py --source synthetic --env dev
+          PYTHONPATH=. python src/ingestion/pipeline_runner.py --source synthetic --env dev
 
       - name: Train fraud model (smoke test)
         run: |
-          python src/models/fraud_model.py \
+          PYTHONPATH=. python src/models/fraud_model.py \
             --data data/processed/features_dev.parquet
         env:
           APP_ENV: test
